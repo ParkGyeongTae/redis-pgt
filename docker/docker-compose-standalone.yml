@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+
+    py38:
+        image: ${PYTHON_IMAGE_NAME}:${PYTHON_IMAGE_VERSION}
+        hostname: ${PYTHON_CONTAINER_NAME}
+        container_name: ${PYTHON_CONTAINER_NAME}
+        stdin_open: true
+        volumes:
+            - type: bind
+              source: ../code
+              target: /code
+              read_only: false
+
+    redis:
+        image: ${REDIS_IMAGE_NAME}:${REDIS_IMAGE_VERSION}
+        hostname: ${REDIS_CONTAINER_NAME}
+        container_name: ${REDIS_CONTAINER_NAME}
+        command: /bin/sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+        env_file:
+            - ./redis_settings/redis.env
+        ports:
+            - 6379:6379
+        volumes:
+            - type: bind
+              source: ../data/redis/standalone
+              target: /data
+              read_only: false

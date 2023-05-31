@@ -1,0 +1,70 @@
+# docker-compose -f docker-compose-cluster-1 up -d 이후 아래 명령어를 입력해줘야 한다!!!!!!
+# docker exec -it redis_1 redis-cli -a password --cluster create redis_1:6379 redis_2:6379 redis_3:6379
+
+version: '2'
+
+services:
+
+    py38:
+        image: ${PYTHON_IMAGE_NAME}:${PYTHON_IMAGE_VERSION}
+        hostname: ${PYTHON_CONTAINER_NAME}
+        container_name: ${PYTHON_CONTAINER_NAME}
+        stdin_open: true
+        volumes:
+            - type: bind
+              source: ../code
+              target: /code
+              read_only: false
+
+    redis_1:
+        image: ${REDIS_IMAGE_NAME}:${REDIS_IMAGE_VERSION}
+        hostname: redis_1
+        container_name: redis_1
+        command: redis-server /etc/redis.conf
+        env_file:
+            - ./redis_settings/redis.env
+        volumes:
+            - type: bind
+              source: ./redis_settings/redis_1.conf
+              target: /etc/redis.conf
+              read_only: false
+            - type: bind
+              source: ../data/redis/cluster/redis_1/dump.rdb
+              target: /data/dump.rdb
+              read_only: false
+        ports:
+            - 7001:6379
+
+    redis_2:
+        image: ${REDIS_IMAGE_NAME}:${REDIS_IMAGE_VERSION}
+        hostname: redis_2
+        container_name: redis_2
+        command: redis-server /etc/redis.conf
+        volumes:
+            - type: bind
+              source: ./redis_settings/redis_2.conf
+              target: /etc/redis.conf
+              read_only: false
+            - type: bind
+              source: ../data/redis/cluster/redis_2/dump.rdb
+              target: /data/dump.rdb
+              read_only: false
+        ports:
+            - 7002:6379
+
+    redis_3:
+        image: ${REDIS_IMAGE_NAME}:${REDIS_IMAGE_VERSION}
+        hostname: redis_3
+        container_name: redis_3
+        command: redis-server /etc/redis.conf
+        volumes:
+            - type: bind
+              source: ./redis_settings/redis_3.conf
+              target: /etc/redis.conf
+              read_only: false
+            - type: bind
+              source: ../data/redis/cluster/redis_3/dump.rdb
+              target: /data/dump.rdb
+              read_only: false
+        ports:
+            - 7003:6379
